@@ -776,3 +776,114 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+
+/* ============================================================
+   Airc native theme (dark space)
+   Compiled into the app; no external stylesheet injection.
+   ============================================================ */
+:root {
+  --airc-bg: #05070d;
+  --airc-text: #e8eef8;
+  --airc-muted: #8a97ac;
+  --airc-line: rgba(255, 255, 255, 0.08);
+  --airc-line-strong: rgba(255, 255, 255, 0.16);
+  --airc-grad: linear-gradient(135deg, #22c55e 0%, #0ea5e9 100%);
+}
+
+html.dark body {
+  background-color: var(--airc-bg);
+  background-image:
+    radial-gradient(1000px 560px at 50% -12%, rgba(14, 165, 233, 0.2), transparent 62%),
+    radial-gradient(800px 460px at 88% 112%, rgba(34, 197, 94, 0.12), transparent 62%);
+  background-attachment: fixed;
+  color: var(--airc-text);
+}
+
+html.dark .min-h-screen,
+html.dark main {
+  background-color: transparent;
+}
+
+html.dark .card,
+html.dark .card-glass,
+html.dark .glass-card {
+  border-color: var(--airc-line);
+  background: linear-gradient(180deg, rgba(19, 28, 46, 0.86), rgba(11, 17, 30, 0.92));
+}
+
+html.dark .card {
+  border-radius: 16px;
+}
+
+html.dark .card:hover {
+  border-color: var(--airc-line-strong);
+}
+
+html.dark .glass {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(5, 7, 13, 0.72);
+}
+
+html.dark aside.sidebar {
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, #070c15 0%, #0a1220 100%);
+}
+
+html.dark .sidebar-link {
+  border-radius: 11px;
+}
+
+html.dark .sidebar-link-active,
+html.dark .sidebar-link[class*='bg-primary'] {
+  background-color: rgba(34, 197, 94, 0.12);
+  color: #7ee2a8;
+}
+
+html.dark .input {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(3, 7, 14, 0.55);
+}
+
+html.dark .input:focus {
+  border-color: rgba(34, 197, 94, 0.55);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+html.dark .input::placeholder {
+  color: #77869c;
+}
+
+html.dark .btn-primary {
+  border-color: transparent;
+  background-color: transparent;
+  background-image: var(--airc-grad);
+  color: #04120a;
+  font-weight: 650;
+  box-shadow: 0 14px 30px -16px rgba(34, 197, 94, 0.8);
+}
+
+html.dark .btn-secondary {
+  border-color: var(--airc-line);
+  background: transparent;
+  color: #cfdaea;
+}
+
+html.dark .btn-secondary:hover {
+  border-color: var(--airc-line-strong);
+  color: #fff;
+}
+
+html.dark ::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.12);
+}

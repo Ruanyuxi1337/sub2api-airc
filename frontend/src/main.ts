@@ -23,11 +23,9 @@ function initIOSViewportZoomFix() {
 }
 
 function initThemeClass() {
-  const savedTheme = localStorage.getItem('theme')
-  const shouldUseDark =
-    savedTheme === 'dark' ||
-    (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  document.documentElement.classList.toggle('dark', shouldUseDark)
+  // Airc theme is dark-only: pin the theme before the app mounts.
+  localStorage.setItem('theme', 'dark')
+  document.documentElement.classList.add('dark')
 }
 
 async function bootstrap() {

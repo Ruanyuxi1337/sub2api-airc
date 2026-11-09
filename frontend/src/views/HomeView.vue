@@ -207,7 +207,6 @@ const priceCards = ref<PriceCard[]>([
 const rechargeText = computed(() => {
   const m = Number(settingsRecord.value.payment_balance_recharge_multiplier)
   if (!Number.isFinite(m) || m <= 0) return '1 元 = 0.15 美元'
-  const per = 1 / m
   return `1 元 = ${m.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')} 美元`
 })
 

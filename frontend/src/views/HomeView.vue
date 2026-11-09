@@ -1,744 +1,658 @@
 <template>
-  <!-- Custom Home Content: Full Page Mode -->
+  <!-- Admin-provided full-page home content keeps priority -->
   <div v-if="hasHomeContent" class="min-h-screen">
-    <!-- iframe mode -->
     <iframe
       v-if="isHomeContentUrl"
       :src="homeContent.trim()"
       class="h-screen w-full border-0"
       allowfullscreen
     ></iframe>
-    <!-- HTML mode - SECURITY: homeContent is admin-only setting, XSS risk is acceptable -->
     <div v-else v-html="homeContent"></div>
   </div>
 
-  <!-- Compact Home Page -->
-  <div
-    v-else-if="compactHomeEnabled"
-    data-testid="compact-home"
-    class="flex min-h-screen flex-col bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white"
-  >
-    <header class="border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-dark-800">
-      <nav class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 sm:gap-4">
-        <div class="flex min-w-0 flex-1 items-center gap-3">
-          <img
-            :src="siteLogo || '/logo.svg'"
-            alt="Logo"
-            class="h-9 w-9 shrink-0 rounded-lg object-contain"
-          />
-          <span class="min-w-0 truncate text-base font-semibold">{{ siteName }}</span>
-        </div>
-        <div class="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-2">
-          <LocaleSwitcher />
-          <a
-            v-if="docUrl"
-            :href="docUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-dark-400 dark:hover:bg-dark-800"
-            :title="t('home.viewDocs')"
-          >
-            <Icon name="book" size="md" />
-          </a>
-          <router-link
-            v-if="showModelPlazaEntry"
-            to="/model-plaza"
-            class="flex h-10 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
-            :title="t('nav.modelPlaza')"
-          >
-            <Icon name="grid" size="md" />
-            <span class="hidden sm:inline">{{ t('nav.modelPlaza') }}</span>
-          </router-link>
-          <button
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-dark-400 dark:hover:bg-dark-800"
-            :title="isDark ? t('home.switchToLight') : t('home.switchToDark')"
-            @click="toggleTheme"
-          >
-            <Icon v-if="isDark" name="sun" size="md" />
-            <Icon v-else name="moon" size="md" />
-          </button>
-          <router-link
-            :to="isAuthenticated ? dashboardPath : '/login'"
-            class="inline-flex min-h-10 shrink-0 items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
-          >
-            {{ isAuthenticated ? t('home.dashboard') : t('home.login') }}
-          </router-link>
-        </div>
-      </nav>
-    </header>
+  <div v-else class="ah-root">
+    <SpaceBackground />
+    <div class="ah-glow" aria-hidden="true"></div>
 
-    <main class="flex min-w-0 flex-1 items-center justify-center px-4 py-16 sm:px-6">
-      <div class="min-w-0 max-w-2xl text-center">
-        <img
-          :src="siteLogo || '/logo.svg'"
-          alt="Logo"
-          class="mx-auto mb-6 h-20 w-20 rounded-2xl object-contain"
-        />
-        <h1 class="[overflow-wrap:anywhere] text-3xl font-bold md:text-4xl">{{ siteName }}</h1>
-        <p class="mt-4 whitespace-pre-wrap [overflow-wrap:anywhere] text-base text-gray-600 dark:text-dark-300">{{ siteSubtitle }}</p>
-        <router-link
-          :to="isAuthenticated ? dashboardPath : '/login'"
-          class="mt-8 inline-flex min-h-10 items-center justify-center rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-700"
-        >
-          {{ isAuthenticated ? t('home.goToDashboard') : t('home.login') }}
+    <nav class="ah-nav">
+      <div class="ah-nav-inner">
+        <router-link to="/" class="ah-brand">
+          <img :src="logoUrl" alt="Logo" class="ah-mark" />
+          {{ siteName }}
         </router-link>
-      </div>
-    </main>
-
-    <footer class="min-w-0 border-t border-gray-200 px-4 py-5 text-center text-sm text-gray-500 [overflow-wrap:anywhere] sm:px-6 dark:border-dark-800 dark:text-dark-400">
-      &copy; {{ currentYear }} {{ siteName }}
-    </footer>
-  </div>
-
-  <!-- Default Home Page -->
-  <div
-    v-else
-    class="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950"
-  >
-    <!-- Background Decorations -->
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        class="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-primary-400/20 blur-3xl"
-      ></div>
-      <div
-        class="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary-500/15 blur-3xl"
-      ></div>
-      <div
-        class="absolute left-1/3 top-1/4 h-72 w-72 rounded-full bg-primary-300/10 blur-3xl"
-      ></div>
-      <div
-        class="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-primary-400/10 blur-3xl"
-      ></div>
-      <div
-        class="absolute inset-0 bg-[linear-gradient(rgba(20,184,166,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(20,184,166,0.03)_1px,transparent_1px)] bg-[size:64px_64px]"
-      ></div>
-    </div>
-
-    <!-- Header -->
-    <header class="relative z-20 px-6 py-4">
-      <nav class="mx-auto flex max-w-6xl items-center justify-between">
-        <!-- Logo -->
-        <div class="flex items-center">
-          <div class="h-10 w-10 overflow-hidden rounded-xl shadow-md">
-            <img :src="siteLogo || '/logo.svg'" alt="Logo" class="h-full w-full object-contain" />
-          </div>
+        <div class="ah-links">
+          <router-link v-if="showModelPlazaEntry" to="/model-plaza">模型广场</router-link>
+          <router-link :to="isAuthenticated ? dashboardPath : '/login'">控制台</router-link>
         </div>
-
-        <!-- Nav Actions -->
-        <div class="flex items-center gap-3">
-          <!-- Language Switcher -->
-          <LocaleSwitcher />
-
-          <!-- Doc Link -->
-          <a
-            v-if="docUrl"
-            :href="docUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
-            :title="t('home.viewDocs')"
-          >
-            <Icon name="book" size="md" />
-          </a>
-
-          <!-- Model Plaza Link -->
-          <router-link
-            v-if="showModelPlazaEntry"
-            to="/model-plaza"
-            class="inline-flex items-center gap-1.5 rounded-lg p-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
-            :title="t('nav.modelPlaza')"
-          >
-            <Icon name="grid" size="md" />
-            <span class="hidden sm:inline">{{ t('nav.modelPlaza') }}</span>
-          </router-link>
-
-          <!-- Theme Toggle -->
-          <button
-            @click="toggleTheme"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
-            :title="isDark ? t('home.switchToLight') : t('home.switchToDark')"
-          >
-            <Icon v-if="isDark" name="sun" size="md" />
-            <Icon v-else name="moon" size="md" />
-          </button>
-
-          <!-- Login / Dashboard Button -->
-          <router-link
-            v-if="isAuthenticated"
-            :to="dashboardPath"
-            class="inline-flex items-center gap-1.5 rounded-full bg-gray-900 py-1 pl-1 pr-2.5 transition-colors hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700"
-          >
-            <span
-              class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-[10px] font-semibold text-white"
-            >
-              {{ userInitial }}
-            </span>
-            <span class="text-xs font-medium text-white">{{ t('home.dashboard') }}</span>
-            <svg
-              class="h-3 w-3 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
-              />
-            </svg>
-          </router-link>
-          <router-link
-            v-else
-            to="/login"
-            class="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700"
-          >
-            {{ t('home.login') }}
-          </router-link>
-        </div>
-      </nav>
-    </header>
-
-    <!-- Main Content -->
-    <main class="relative z-10 flex-1 px-6 py-16">
-      <div class="mx-auto max-w-6xl">
-        <!-- Hero Section - Left/Right Layout -->
-        <div class="mb-12 flex flex-col items-center justify-between gap-12 lg:flex-row lg:gap-16">
-          <!-- Left: Text Content -->
-          <div class="flex-1 text-center lg:text-left">
-            <h1
-              class="mb-4 text-4xl font-bold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"
-            >
-              {{ siteName }}
-            </h1>
-            <p class="mb-8 text-lg text-gray-600 dark:text-dark-300 md:text-xl">
-              {{ siteSubtitle }}
-            </p>
-
-            <!-- CTA Button -->
-            <div>
-              <router-link
-                :to="isAuthenticated ? dashboardPath : '/login'"
-                class="btn btn-primary px-8 py-3 text-base shadow-lg shadow-primary-500/30"
-              >
-                {{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}
-                <Icon name="arrowRight" size="md" class="ml-2" :stroke-width="2" />
-              </router-link>
-            </div>
-          </div>
-
-          <!-- Right: Terminal Animation -->
-          <div class="flex flex-1 justify-center lg:justify-end">
-            <div class="terminal-container">
-              <div class="terminal-window">
-                <!-- Window header -->
-                <div class="terminal-header">
-                  <div class="terminal-buttons">
-                    <span class="btn-close"></span>
-                    <span class="btn-minimize"></span>
-                    <span class="btn-maximize"></span>
-                  </div>
-                  <span class="terminal-title">terminal</span>
-                </div>
-                <!-- Terminal content -->
-                <div class="terminal-body">
-                  <div class="code-line line-1">
-                    <span class="code-prompt">$</span>
-                    <span class="code-cmd">curl</span>
-                    <span class="code-flag">-X POST</span>
-                    <span class="code-url">/v1/messages</span>
-                  </div>
-                  <div class="code-line line-2">
-                    <span class="code-comment"># Routing to upstream...</span>
-                  </div>
-                  <div class="code-line line-3">
-                    <span class="code-success">200 OK</span>
-                    <span class="code-response">{ "content": "Hello!" }</span>
-                  </div>
-                  <div class="code-line line-4">
-                    <span class="code-prompt">$</span>
-                    <span class="cursor"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature Tags - Centered -->
-        <div class="mb-12 flex flex-wrap items-center justify-center gap-4 md:gap-6">
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="swap" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.subscriptionToApi')
-            }}</span>
-          </div>
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="shield" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.stickySession')
-            }}</span>
-          </div>
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="chart" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.realtimeBilling')
-            }}</span>
-          </div>
-        </div>
-
-        <!-- Features Grid -->
-        <div class="mb-12 grid gap-6 md:grid-cols-3">
-          <!-- Feature 1: Unified Gateway -->
-          <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 transition-transform group-hover:scale-110"
-            >
-              <Icon name="server" size="lg" class="text-white" />
-            </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.features.unifiedGateway') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.features.unifiedGatewayDesc') }}
-            </p>
-          </div>
-
-          <!-- Feature 2: Account Pool -->
-          <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg shadow-primary-500/30 transition-transform group-hover:scale-110"
-            >
-              <svg
-                class="h-6 w-6 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-                />
-              </svg>
-            </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.features.multiAccount') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.features.multiAccountDesc') }}
-            </p>
-          </div>
-
-          <!-- Feature 3: Billing & Quota -->
-          <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30 transition-transform group-hover:scale-110"
-            >
-              <svg
-                class="h-6 w-6 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-                />
-              </svg>
-            </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.features.balanceQuota') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.features.balanceQuotaDesc') }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Supported Providers -->
-        <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">
-            {{ t('home.providers.title') }}
-          </h2>
-          <p class="text-sm text-gray-600 dark:text-dark-400">
-            {{ t('home.providers.description') }}
-          </p>
-        </div>
-
-        <div class="mb-16 flex flex-wrap items-center justify-center gap-4">
-          <!-- Claude - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-400 to-orange-500"
-            >
-              <span class="text-xs font-bold text-white">C</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.claude') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- GPT - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-600"
-            >
-              <span class="text-xs font-bold text-white">G</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">GPT</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- Gemini - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600"
-            >
-              <span class="text-xs font-bold text-white">G</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.gemini') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- Antigravity - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-pink-600"
-            >
-              <span class="text-xs font-bold text-white">A</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.antigravity') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- More - Coming Soon -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-gray-200/50 bg-white/40 px-5 py-3 opacity-60 backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/40"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-gray-500 to-gray-600"
-            >
-              <span class="text-xs font-bold text-white">+</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.more') }}</span>
-            <span
-              class="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-dark-700 dark:text-dark-400"
-              >{{ t('home.providers.soon') }}</span
-            >
-          </div>
+        <div class="ah-right">
+          <template v-if="isAuthenticated">
+            <router-link class="ah-ghost" :to="dashboardPath">进入控制台</router-link>
+          </template>
+          <template v-else>
+            <router-link class="ah-ghost" to="/login">登录</router-link>
+            <router-link class="ah-solid" to="/login?tab=register">免费注册</router-link>
+          </template>
         </div>
       </div>
-    </main>
+    </nav>
 
-    <!-- Footer -->
-    <footer class="relative z-10 border-t border-gray-200/50 px-6 py-8 dark:border-dark-800/50">
-      <div
-        class="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 text-center sm:flex-row sm:text-left"
-      >
-        <p class="text-sm text-gray-500 dark:text-dark-400">
-          &copy; {{ currentYear }} {{ siteName }}. {{ t('home.footer.allRightsReserved') }}
+    <div class="ah-wrap">
+      <header class="ah-hero">
+        <span class="ah-badge">● {{ stats.models || '—' }} 个模型在线 · 按官方价 {{ minRateText }} 起</span>
+        <h1>一个 Key，<span class="ah-grad">接入所有主流模型</span></h1>
+        <p class="ah-lead">
+          OpenAI 兼容接口，改一行 base_url 就能用。按量计费、余额不过期，<br />
+          每个模型都标注真实上游与官方价对比。
         </p>
-        <div class="flex items-center gap-4">
-          <a
-            v-if="docUrl"
-            :href="docUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
-          >
-            {{ t('home.docs') }}
-          </a>
-          <a
-            :href="githubUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
-          >
-            GitHub
-          </a>
+        <div class="ah-ctas">
+          <router-link class="ah-solid ah-big" to="/login?tab=register">免费注册</router-link>
+          <router-link class="ah-ghost ah-big" to="/model-plaza">查看模型广场 →</router-link>
         </div>
-      </div>
-    </footer>
+
+        <div class="ah-term">
+          <div class="ah-term-bar"><i></i><i></i><i></i></div>
+<pre><span class="c"># Claude Code / Cursor</span>
+<span class="k">export</span> ANTHROPIC_BASE_URL=<span class="s">"{{ apiBaseUrl }}"</span>
+<span class="k">export</span> ANTHROPIC_AUTH_TOKEN=<span class="s">"sk-..."</span>
+
+<span class="c"># 任何 OpenAI SDK / 脚本</span>
+<span class="k">export</span> OPENAI_BASE_URL=<span class="s">"{{ apiBaseUrl }}/v1"</span>
+<span class="k">export</span> OPENAI_API_KEY=<span class="s">"sk-..."</span>
+
+curl {{ apiBaseUrl }}/v1/chat/completions \
+  -H <span class="s">"Authorization: Bearer ***"</span> \
+  -d <span class="s">'{"model":"claude-sonnet-5-5","messages":[{"role":"user","content":"hi"}]}'</span></pre>
+        </div>
+
+        <div class="ah-stats">
+          <div class="ah-stat"><b>{{ stats.models || '—' }}</b><span>在线模型</span></div>
+          <div class="ah-stat"><b>{{ stats.groups || '—' }}</b><span>可用线路</span></div>
+          <div class="ah-stat"><b>{{ minRateText }}</b><span>官方价折扣</span></div>
+          <div class="ah-stat"><b>{{ rechargeText }}</b><span>充值汇率</span></div>
+        </div>
+      </header>
+
+      <section id="pricing" class="ah-section">
+        <h2>按线路定价，价格公开</h2>
+        <p class="ah-sub">实付价 = 官方价 × 分组倍率，充值时按 {{ rechargeText }} 入账。</p>
+        <div class="ah-grid4">
+          <div v-for="card in priceCards" :key="card.title" class="ah-price">
+            <h3>{{ card.title }}</h3>
+            <div class="ah-tag">{{ card.tag }}</div>
+            <div class="ah-rate">{{ card.rate }}<small>官方价</small></div>
+            <ul>
+              <li v-for="item in card.items" :key="item">{{ item }}</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="ah-section">
+        <h2>为什么选我们</h2>
+        <p class="ah-sub">不靠形容词，靠可核对的东西。</p>
+        <div class="ah-feats">
+          <div class="ah-feat">
+            <h4>上游透明</h4>
+            <p>每个模型标注真实上游类型与官方价，不写“官转”这类模糊说法。</p>
+          </div>
+          <div class="ah-feat">
+            <h4>多账号自动故障转移</h4>
+            <p>单账号限流或掉线自动切下一个，客户端无感。</p>
+          </div>
+          <div class="ah-feat">
+            <h4>余额不过期 · 按量计费</h4>
+            <p>没有套餐绑定，没有月费，用多少扣多少。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="ah-section">
+        <h2>常见问题</h2>
+        <p class="ah-sub">还有疑问，发邮件到 support@airc.fun，工作日 24 小时内回复。</p>
+        <div class="ah-feats">
+          <div class="ah-feat">
+            <h4>注册有免费额度吗？</h4>
+            <p>注册不赠送额度。充值后按 {{ rechargeText }} 入账，充 100 元到账 16.5 美元；邀请好友充值，邀请人再返 10%。</p>
+          </div>
+          <div class="ah-feat">
+            <h4>充值和计费怎么算？</h4>
+            <p>1 元 = 0.15 美元额度（约 6.67 元 = 1 美元）。充值赠送 10%，收银台另收 1.5% 通道手续费。</p>
+          </div>
+          <div class="ah-feat">
+            <h4>接口兼容吗？</h4>
+            <p>OpenAI 兼容 <code>/v1/chat/completions</code>、<code>/v1/models</code>；Claude 原生 <code>/v1/messages</code>。</p>
+          </div>
+          <div class="ah-feat">
+            <h4>能开发票 / 退款吗？</h4>
+            <p>可以。发送订单号到 support@airc.fun，发票与退款按原支付渠道处理。</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="ah-footer">
+        <div>© {{ currentYear }} {{ siteName }} · support@airc.fun</div>
+        <div class="ah-flinks">
+          <a href="/user-agreement">服务条款</a>
+          <a href="/privacy-policy">隐私政策</a>
+        </div>
+      </footer>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { computed, onMounted, ref } from 'vue'
 import { useAuthStore, useAppStore } from '@/stores'
-import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
-import Icon from '@/components/icons/Icon.vue'
 import { sanitizeUrl } from '@/utils/url'
-import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
+import SpaceBackground from '@/components/common/SpaceBackground.vue'
 
-const { t } = useI18n()
+type PlazaModel = { name?: string }
+type PlazaGroup = {
+  name?: string
+  platform?: string
+  rate_multiplier?: number | string
+  models?: PlazaModel[]
+}
+type PriceCard = { title: string; tag: string; rate: string; items: string[] }
 
 const authStore = useAuthStore()
 const appStore = useAppStore()
 
-// Site settings - directly from appStore (already initialized from injected config)
-const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'Sub2API')
-const siteLogo = computed(() => sanitizeUrl(appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '', { allowRelative: true, allowDataUrl: true }))
-const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || 'AI API Gateway Platform')
-const docUrl = computed(() => sanitizeUrl(appStore.cachedPublicSettings?.doc_url || appStore.docUrl || ''))
+const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'Airc API')
+const logoUrl = computed(
+  () => sanitizeUrl(appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '', {
+    allowRelative: true,
+    allowDataUrl: true,
+  }) || '/logo.svg',
+)
 const homeContent = computed(() => appStore.cachedPublicSettings?.home_content || '')
 const hasHomeContent = computed(() => homeContent.value.trim().length > 0)
-const compactHomeEnabled = computed(() => appStore.cachedPublicSettings?.compact_home_enabled === true)
-const modelPlazaEnabled = computed(() => isFeatureFlagEnabled(FeatureFlags.modelPlaza))
-
-// Check if homeContent is a URL (for iframe display)
 const isHomeContentUrl = computed(() => {
-  const content = homeContent.value.trim()
-  return content.startsWith('http://') || content.startsWith('https://')
+  const c = homeContent.value.trim()
+  return c.startsWith('http://') || c.startsWith('https://')
 })
+const apiBaseUrl = computed(() => (appStore.cachedPublicSettings?.api_base_url || 'https://api.airc.fun').replace(/\/+$/, ''))
 
-// Theme
-const isDark = ref(document.documentElement.classList.contains('dark'))
-
-// GitHub URL
-const githubUrl = 'https://github.com/Wei-Shaw/sub2api'
-
-// Auth state
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+const isAdmin = computed(() => authStore.isAdmin)
+const dashboardPath = computed(() => (isAdmin.value ? '/admin/dashboard' : '/dashboard'))
 const modelPlazaRequiresAuth = computed(
   () => appStore.cachedPublicSettings?.model_plaza_require_auth === true,
 )
-const showModelPlazaEntry = computed(
-  () => modelPlazaEnabled.value && (isAuthenticated.value || !modelPlazaRequiresAuth.value),
+const modelPlazaEnabled = computed(
+  () => appStore.cachedPublicSettings?.model_plaza_enabled !== false,
 )
-const isAdmin = computed(() => authStore.isAdmin)
-const dashboardPath = computed(() => isAdmin.value ? '/admin/dashboard' : '/dashboard')
-const userInitial = computed(() => {
-  const user = authStore.user
-  if (!user || !user.email) return ''
-  return user.email.charAt(0).toUpperCase()
-})
+const showModelPlazaEntry = computed(
+  () => modelPlazaEnabled.value && (modelPlazaRequiresAuth.value === false || isAuthenticated.value),
+)
+const settingsRecord = computed(
+  () => (appStore.cachedPublicSettings ?? {}) as unknown as Record<string, unknown>,
+)
 
-// Current year for footer
 const currentYear = computed(() => new Date().getFullYear())
 
-// Toggle theme
-function toggleTheme() {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
+const stats = ref<{ models: number; groups: number; minRate: number | null }>({
+  models: 0,
+  groups: 0,
+  minRate: null,
+})
+
+const priceCards = ref<PriceCard[]>([
+  { title: 'Claude 专线', tag: 'Anthropic 官方口径', rate: '—', items: ['Sonnet / Opus 5.5 全系', '1M 上下文', '支持 prompt caching'] },
+  { title: '企业级 GPT', tag: 'OpenAI 兼容', rate: '—', items: ['GPT-6 Astra / 6 Sol / 6.1 Sol', '922K–1.05M 上下文', '工具调用 / 流式'] },
+  { title: 'Gemini 极速', tag: 'Flash 全系', rate: '—', items: ['3.8 / 3.5 Flash · Argon 4', '图片生成', '超长上下文'] },
+  { title: '国产大模型', tag: 'Kimi / 智谱 / DeepSeek', rate: '—', items: ['Kimi K3 / K3.1 Pro', 'DeepSeek V4 / V4.1 Flash', 'GLM-5.3 / GLM-5.2'] },
+])
+
+const rechargeText = computed(() => {
+  const m = Number(settingsRecord.value.payment_balance_recharge_multiplier)
+  if (!Number.isFinite(m) || m <= 0) return '1 元 = 0.15 美元'
+  const per = 1 / m
+  return `1 元 = ${m.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')} 美元`
+})
+
+const minRateText = computed(() => (stats.value.minRate === null ? '—' : formatRate(stats.value.minRate)))
+
+function formatRate(rate: number): string {
+  if (!Number.isFinite(rate)) return '—'
+  const floored = Math.floor(rate * 100) / 100
+  return `${floored.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}×`
 }
 
-// Initialize theme
-function initTheme() {
-  const savedTheme = localStorage.getItem('theme')
-  if (
-    savedTheme === 'dark' ||
-    (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  ) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
+function familyMin(groups: PlazaGroup[], match: (g: PlazaGroup) => boolean): number | null {
+  let min: number | null = null
+  for (const g of groups) {
+    if (!match(g)) continue
+    const r = Number(g.rate_multiplier)
+    if (Number.isFinite(r) && (min === null || r < min)) min = r
+  }
+  return min
+}
+
+async function loadPlaza() {
+  try {
+    const res = await fetch('/api/v1/model-plaza')
+    if (!res.ok) return
+    const payload = await res.json()
+    const data = payload?.data ?? payload
+    const groups: PlazaGroup[] = Array.isArray(data?.groups) ? data.groups : []
+    const names = new Set<string>()
+    let min: number | null = null
+    for (const g of groups) {
+      const r = Number(g.rate_multiplier)
+      if (Number.isFinite(r) && (min === null || r < min)) min = r
+      for (const m of g.models ?? []) {
+        if (m?.name) names.add(String(m.name))
+      }
+    }
+    stats.value = { models: names.size, groups: groups.length, minRate: min }
+
+    const cpu = familyMin(groups, (g) => g.platform === 'kimi' || g.platform === 'zhipu' || g.platform === 'deepseek')
+    const claude = familyMin(groups, (g) => g.platform === 'anthropic' || /claude|ccmax/i.test(g.name || ''))
+    const gpt = familyMin(groups, (g) => g.platform === 'openai')
+    const gemini = familyMin(groups, (g) => g.platform === 'antigravity' && /gemini/i.test(g.name || ''))
+    const rates = [claude, gpt, gemini, cpu]
+    priceCards.value = priceCards.value.map((card, i) => ({
+      ...card,
+      rate: rates[i] === null ? '—' : formatRate(rates[i] as number),
+    }))
+  } catch {
+    // keep fallback values
   }
 }
 
 onMounted(() => {
-  initTheme()
-
-  // Check auth state
   authStore.checkAuth()
-
-  // Ensure public settings are loaded (will use cache if already loaded from injected config)
-  if (!appStore.publicSettingsLoaded) {
-    appStore.fetchPublicSettings()
-  }
+  appStore.fetchPublicSettings()
+  void loadPlaza()
 })
 </script>
 
 <style scoped>
-/* Terminal Container */
-.terminal-container {
+.ah-root {
   position: relative;
-  display: inline-block;
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: #e8eef8;
+  font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Terminal Window */
-.terminal-window {
-  width: 420px;
-  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-  border-radius: 14px;
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
-  transition: transform 0.3s ease;
+.ah-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  animation: ah-nebula 16s ease-in-out infinite alternate;
+  background:
+    radial-gradient(1000px 560px at 50% -12%, rgba(14, 165, 233, 0.2), transparent 62%),
+    radial-gradient(800px 460px at 88% 112%, rgba(34, 197, 94, 0.12), transparent 62%);
 }
 
-.terminal-window:hover {
-  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(-4px);
+@keyframes ah-nebula {
+  from { opacity: 0.72; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.07); }
 }
 
-/* Terminal Header */
-.terminal-header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: rgba(30, 41, 59, 0.8);
+.ah-wrap {
+  position: relative;
+  z-index: 2;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.ah-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(5, 7, 13, 0.6);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 
-.terminal-buttons {
+.ah-nav-inner {
   display: flex;
-  gap: 8px;
+  max-width: 1120px;
+  margin: 0 auto;
+  align-items: center;
+  gap: 28px;
+  padding: 14px 24px;
 }
 
-.terminal-buttons span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.btn-close {
-  background: #ef4444;
-}
-.btn-minimize {
-  background: #eab308;
-}
-.btn-maximize {
-  background: #22c55e;
-}
-
-.terminal-title {
-  flex: 1;
-  text-align: center;
-  font-size: 12px;
-  font-family: ui-monospace, monospace;
-  color: #64748b;
-  margin-right: 52px;
-}
-
-/* Terminal Body */
-.terminal-body {
-  padding: 20px 24px;
-  font-family: ui-monospace, 'Fira Code', monospace;
-  font-size: 14px;
-  line-height: 2;
-}
-
-.code-line {
+.ah-brand {
   display: flex;
   align-items: center;
+  gap: 10px;
+  color: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.ah-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+}
+
+.ah-links {
+  display: flex;
+  gap: 24px;
+  margin-left: 8px;
+  font-size: 13.5px;
+  color: #8a97ac;
+}
+
+.ah-links a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ah-links a:hover {
+  color: #fff;
+}
+
+.ah-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.ah-ghost,
+.ah-solid {
+  display: inline-flex;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ah-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: #cfdaea;
+}
+
+.ah-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.ah-solid {
+  border: 0;
+  background: linear-gradient(135deg, #22c55e 0%, #0ea5e9 100%);
+  color: #04120a;
+  font-weight: 700;
+  box-shadow: 0 12px 28px -12px rgba(34, 197, 94, 0.7);
+}
+
+.ah-hero {
+  padding: 76px 0 40px;
+  text-align: center;
+}
+
+.ah-badge {
+  display: inline-flex;
+  height: 30px;
+  align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
-  opacity: 0;
-  animation: line-appear 0.5s ease forwards;
+  padding: 0 13px;
+  border: 1px solid rgba(14, 165, 233, 0.32);
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.1);
+  color: #9fd4f2;
+  font-size: 12px;
 }
 
-.line-1 {
-  animation-delay: 0.3s;
-}
-.line-2 {
-  animation-delay: 1s;
-}
-.line-3 {
-  animation-delay: 1.8s;
-}
-.line-4 {
-  animation-delay: 2.5s;
+.ah-hero h1 {
+  margin: 20px 0 14px;
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.14;
 }
 
-@keyframes line-appear {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.ah-grad {
+  background: linear-gradient(135deg, #22c55e 0%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.code-prompt {
-  color: #22c55e;
-  font-weight: bold;
-}
-.code-cmd {
-  color: #38bdf8;
-}
-.code-flag {
-  color: #a78bfa;
-}
-.code-url {
-  color: #14b8a6;
-}
-.code-comment {
-  color: #64748b;
-  font-style: italic;
-}
-.code-success {
-  color: #22c55e;
-  background: rgba(34, 197, 94, 0.15);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 600;
-}
-.code-response {
-  color: #fbbf24;
+.ah-lead {
+  max-width: 620px;
+  margin: 0 auto;
+  color: #8a97ac;
+  font-size: 15.5px;
+  line-height: 1.75;
 }
 
-/* Blinking Cursor */
-.cursor {
-  display: inline-block;
-  width: 8px;
-  height: 16px;
-  background: #22c55e;
-  animation: blink 1s step-end infinite;
+.ah-ctas {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
 }
 
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
+.ah-big {
+  height: 46px;
+  padding: 0 26px;
+  border-radius: 12px;
+  font-size: 14.5px;
 }
 
-/* Dark mode adjustments */
-:deep(.dark) .terminal-window {
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(20, 184, 166, 0.2),
-    0 0 40px rgba(20, 184, 166, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.ah-term {
+  max-width: 720px;
+  margin: 34px auto 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(17, 26, 44, 0.9), rgba(9, 14, 24, 0.95));
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
+}
+
+.ah-term-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ah-term-bar i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2b3648;
+}
+
+.ah-term pre {
+  margin: 0;
+  padding: 18px;
+  overflow: auto;
+  color: #9fb3cc;
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  font-size: 12.6px;
+  line-height: 1.85;
+  text-align: left;
+}
+
+.ah-term .k { color: #7dd3fc; }
+.ah-term .s { color: #86efac; }
+.ah-term .c { color: #4b5a70; }
+
+.ah-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 56px;
+}
+
+.ah-stat {
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.ah-stat b {
+  display: block;
+  font-size: 22px;
+  letter-spacing: -0.2px;
+}
+
+.ah-stat span {
+  color: #5d6a7e;
+  font-size: 12.5px;
+}
+
+.ah-section {
+  padding: 64px 0 0;
+}
+
+.ah-section h2 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.ah-sub {
+  margin: 0 0 26px;
+  color: #8a97ac;
+  font-size: 14px;
+}
+
+.ah-grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.ah-price {
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+}
+
+.ah-price h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.ah-tag {
+  color: #5d6a7e;
+  font-size: 11.5px;
+}
+
+.ah-rate {
+  margin: 14px 0 4px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.ah-rate small {
+  margin-left: 4px;
+  color: #5d6a7e;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ah-price ul {
+  margin: 14px 0 0;
+  padding: 0;
+  color: #8a97ac;
+  font-size: 12.5px;
+  line-height: 2;
+  list-style: none;
+}
+
+.ah-price li::before {
+  content: '·';
+  margin-right: 8px;
+  color: #5d6a7e;
+}
+
+.ah-feats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.ah-feat {
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.ah-feat h4 {
+  margin: 0 0 6px;
+  font-size: 14.5px;
+}
+
+.ah-feat p {
+  margin: 0;
+  color: #8a97ac;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.ah-feat code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+}
+
+.ah-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 70px;
+  padding: 26px 0 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: #5d6a7e;
+  font-size: 12.5px;
+}
+
+.ah-flinks {
+  display: flex;
+  gap: 18px;
+}
+
+.ah-flinks a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ah-flinks a:hover {
+  color: #b9c8da;
+}
+
+@media (max-width: 900px) {
+  .ah-hero h1 { font-size: 36px; }
+  .ah-stats { grid-template-columns: repeat(2, 1fr); }
+  .ah-grid4 { grid-template-columns: repeat(2, 1fr); }
+  .ah-feats { grid-template-columns: 1fr; }
+  .ah-links { display: none; }
+}
+
+@media (max-width: 520px) {
+  .ah-hero h1 { font-size: 30px; }
+  .ah-ctas { flex-direction: column; }
+  .ah-grid4 { grid-template-columns: 1fr; }
+  .ah-hero { padding: 52px 0 24px; }
 }
 </style>

@@ -68,13 +68,13 @@ curl {{ apiBaseUrl }}/v1/chat/completions \
           <div class="ah-stat"><b>{{ stats.models || '—' }}</b><span>在线模型</span></div>
           <div class="ah-stat"><b>{{ stats.groups || '—' }}</b><span>可用线路</span></div>
           <div class="ah-stat"><b>{{ minRateText }}</b><span>官方价折扣</span></div>
-          <div class="ah-stat"><b>{{ rechargeText }}</b><span>充值汇率</span></div>
+          <div class="ah-stat"><b>{{ stats.vendors || '—' }}</b><span>覆盖厂商</span></div>
         </div>
       </header>
 
       <section id="pricing" class="ah-section">
         <h2>按线路定价，价格公开</h2>
-        <p class="ah-sub">实付价 = 官方价 × 分组倍率，充值时按 {{ rechargeText }} 入账。</p>
+        <p class="ah-sub">实付价 = 官方价 × 分组倍率，具体以模型广场与充值页为准。</p>
         <div class="ah-grid4">
           <div v-for="card in priceCards" :key="card.title" class="ah-price">
             <h3>{{ card.title }}</h3>
@@ -112,11 +112,11 @@ curl {{ apiBaseUrl }}/v1/chat/completions \
         <div class="ah-feats">
           <div class="ah-feat">
             <h4>注册有免费额度吗？</h4>
-            <p>注册不赠送额度。充值后按 {{ rechargeText }} 入账，充 100 元到账 16.5 美元；邀请好友充值，邀请人再返 10%。</p>
+            <p>注册不赠送额度。充值后按充值页显示的汇率入账；邀请好友充值，邀请人再返 10%。</p>
           </div>
           <div class="ah-feat">
             <h4>充值和计费怎么算？</h4>
-            <p>1 元 = 0.15 美元额度（约 6.67 元 = 1 美元）。充值赠送 10%，收银台另收 1.5% 通道手续费。</p>
+            <p>余额按美元计费，充值金额按充值页汇率折算；充值赠送 10%（以活动页面为准），收银台另收 1.5% 通道手续费。</p>
           </div>
           <div class="ah-feat">
             <h4>接口兼容吗？</h4>
@@ -185,16 +185,14 @@ const modelPlazaEnabled = computed(
 const showModelPlazaEntry = computed(
   () => modelPlazaEnabled.value && (modelPlazaRequiresAuth.value === false || isAuthenticated.value),
 )
-const settingsRecord = computed(
-  () => (appStore.cachedPublicSettings ?? {}) as unknown as Record<string, unknown>,
-)
 
 const currentYear = computed(() => new Date().getFullYear())
 
-const stats = ref<{ models: number; groups: number; minRate: number | null }>({
+const stats = ref<{ models: number; groups: number; minRate: number | null; vendors: number }>({
   models: 0,
   groups: 0,
   minRate: null,
+  vendors: 0,
 })
 
 const priceCards = ref<PriceCard[]>([
@@ -204,11 +202,6 @@ const priceCards = ref<PriceCard[]>([
   { title: '国产大模型', tag: 'Kimi / 智谱 / DeepSeek', rate: '—', items: ['Kimi K3 / K3.1 Pro', 'DeepSeek V4 / V4.1 Flash', 'GLM-5.3 / GLM-5.2'] },
 ])
 
-const rechargeText = computed(() => {
-  const m = Number(settingsRecord.value.payment_balance_recharge_multiplier)
-  if (!Number.isFinite(m) || m <= 0) return '1 元 = 0.15 美元'
-  return `1 元 = ${m.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')} 美元`
-})
 
 const minRateText = computed(() => (stats.value.minRate === null ? '—' : formatRate(stats.value.minRate)))
 
@@ -236,15 +229,17 @@ async function loadPlaza() {
     const data = payload?.data ?? payload
     const groups: PlazaGroup[] = Array.isArray(data?.groups) ? data.groups : []
     const names = new Set<string>()
+    const vendors = new Set<string>()
     let min: number | null = null
     for (const g of groups) {
       const r = Number(g.rate_multiplier)
       if (Number.isFinite(r) && (min === null || r < min)) min = r
+      if (g.platform) vendors.add(g.platform)
       for (const m of g.models ?? []) {
         if (m?.name) names.add(String(m.name))
       }
     }
-    stats.value = { models: names.size, groups: groups.length, minRate: min }
+    stats.value = { models: names.size, groups: groups.length, minRate: min, vendors: vendors.size }
 
     const cpu = familyMin(groups, (g) => g.platform === 'kimi' || g.platform === 'zhipu' || g.platform === 'deepseek')
     const claude = familyMin(groups, (g) => g.platform === 'anthropic' || /claude|ccmax/i.test(g.name || ''))

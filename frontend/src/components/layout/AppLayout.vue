@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-dark-950">
+  <div class="min-h-screen bg-gray-50 dark:bg-transparent">
+    <SpaceBackground />
     <!-- Background Decoration -->
     <div class="pointer-events-none fixed inset-0 bg-mesh-gradient"></div>
 
@@ -30,6 +31,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useOnboardingTour } from '@/composables/useOnboardingTour'
 import { useOnboardingStore } from '@/stores/onboarding'
 import AppSidebar from './AppSidebar.vue'
+import SpaceBackground from '@/components/common/SpaceBackground.vue'
 import AppHeader from './AppHeader.vue'
 
 const appStore = useAppStore()

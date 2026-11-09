@@ -27,10 +27,6 @@
 
         <slot />
       </main>
-
-      <div class="airc-foot">
-        <slot name="footer" />
-      </div>
     </div>
 
     <div class="airc-status"><span class="airc-dot"></span> 所有系统运行正常</div>
@@ -258,7 +254,7 @@ onMounted(() => {
   position: fixed;
   left: 28px;
   bottom: 22px;
-  z-index: 5;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -278,7 +274,7 @@ onMounted(() => {
   position: fixed;
   right: 28px;
   bottom: 22px;
-  z-index: 5;
+  z-index: 1;
   color: #4c5a6d;
   font-size: 11.5px;
 }

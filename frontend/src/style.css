@@ -791,6 +791,10 @@
   --airc-grad: linear-gradient(135deg, #22c55e 0%, #0ea5e9 100%);
 }
 
+html.dark {
+  background-color: var(--airc-bg);
+}
+
 html.dark body {
   background-color: var(--airc-bg);
   background-image:
